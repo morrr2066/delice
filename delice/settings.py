@@ -59,6 +59,7 @@ MIDDLEWARE = [
     'simple_history.middleware.HistoryRequestMiddleware',
     'django.middleware.cache.FetchFromCacheMiddleware',
     'middleware.DisableClientSideCachingMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
 
 ROOT_URLCONF = 'delice.urls'
@@ -131,9 +132,5 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-
-# كود مؤقت لعمل حساب الأدمن أوتوماتيك
-from django.db.models.signals import post_migrate
-from django.dispatch import receiver
-from django.contrib.auth import get_user_model
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
