@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Home</title>
+</head>
+<body>
+{% if user.is_superuser %}
+<a href="{% url 'admin:index' %}" >Admin</a>
+{% endif %}
+    <a href="{% url 'logout' %}"> Logout </a>
+    <h2>Welcome, {{user.username}}</h2>
+    <br><br><br>
+    <a href="{% url 'storage' %}"> Storage </a>
+    &nbsp;&nbsp;
+    <a href="{% url 'employees' %}"> Employees </a>
+    &nbsp;&nbsp;
+{% if perms.analytics.add_financialentry or perms.analytics.view_financialentry %}
+    <a href="{% url 'analytics' %}"> Analytics </a>
+{% endif %}
+</body>
+</html>

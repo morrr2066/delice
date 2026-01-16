@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Storage</title>
+</head>
+<body>
+
+    <!-- Home Button -->
+    <a href="{% url 'home' %}">Home</a>
+&nbsp;&nbsp;
+{% if perms.storage.view_formula %}
+    <!-- Formulas Button -->
+    <a href="{% url 'formulas' %}">Formulas</a>
+{% endif %}
+
+<br><br><br><br>
+{% if perms.storage.view_item %}
+<a href="{% url 'storage-items' %}">Items</a>
+{% endif %}
+    &nbsp;&nbsp;
+{% if perms.storage.view_batch %}
+<a href="{% url 'storage-batches' %}">Batches</a>
+{% endif %}
+    &nbsp;&nbsp;
+{% if perms.storage.view_raw %}
+<a href="{% url 'storage-raws' %}">Raw Materials</a>
+{% endif %}
+
+
+
+</body>
+</html>

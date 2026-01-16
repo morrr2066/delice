@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Items</title>
+</head>
+<body>
+<!-- Items Table -->
+<!--    <button onclick="openItemsTablePopup()">Items</button>-->
+<!--    <div id="popup-items-table" style="display:none;">-->
+
+        <!-- Add Item Button -->
+    {% if perms.storage.add_item %}
+    <button onclick="openAddItemPopup()">Add Item</button>
+
+    <div id="popup-add-item" style="display:none;">
+        <form method="POST" action="{% url 'add_item' %}">
+            {% csrf_token %}
+            <input name="name" placeholder="Item name" required>
+            <input name="price" placeholder="Item price" required>
+            <textarea name="details" placeholder="Details"></textarea>
+            <button type="submit">Add</button>
+        </form>
+            <button onclick="closeAddItemPopup()">Cancel</button>
+    </div>
+    {% endif %}
+
+    {% if perms.storage.view_item %}
+        <!-- Table -->
+        <h1>Items in Storage</h1>
+        <table border="2">
+            <tr>
+                <th>SKU</th>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>Details</th>
+                {% if perms.storage.delete_item %}
+                <th>Delete</th>
+                {% endif %}
+            </tr>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.SKU }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }} EGP</td>
+                <td>{{ item.details }}</td>
+                {% if perms.storage.delete_item %}
+                <td>
+                    <a href="{% url 'delete_item' item.id %}"
+                       onclick="return confirm('Are you sure you want to delete this item?')"
+                       style="color: red;">
+                       Delete
+                    </a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No items found.</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+<script>
+    <!--Item-->
+
+function openAddItemPopup() {
+  document.getElementById("popup-add-item").style.display = "block";
+}
+
+function closeAddItemPopup() {
+  document.getElementById("popup-add-item").style.display = "none";
+}
+
+
+
+</script>
+</body>
+</html>

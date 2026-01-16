@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Batches</title>
+</head>
+<body>
+<!-- Batches Table -->
+<!--    <button onclick="openBatchesTablePopup()">Batches</button>-->
+<!--    <div id="popup-batches-table" style="display:none;">-->
+
+    <!-- Add Batch -->
+    {% if perms.storage.add_batch %}
+{%load humanize%}
+    <button onclick="openBatchPopup()">Add Batch</button>
+
+        <div id="popup-batch" style="display:none;">
+        <form method="POST" action="{% url 'add_batch' %}">
+            {% csrf_token %}
+            <select name="item" required>
+            {% for item in items %}
+            <option value="{{ item.id }}">{{ item.name }}</option>
+            {% endfor %}
+            </select>
+            <input name="batch_quantity" type="number" placeholder="Quantity (piece)" min="0" required>
+            <input type="date" name="production_date" required>
+            <input type="date" name="expiry_date" required>
+            <input type="number" name="cost" placeholder="Cost" required>
+            <textarea name="details" placeholder="Details"></textarea>
+            <button type="submit">Add</button>
+        </form>
+            <button onclick="closeBatchPopup()">Cancel</button>
+    </div>
+    {% endif %}
+
+    {% if perms.storage.view_batch %}
+    <!-- Table -->
+        <h1>Items Batches</h1>
+        <table border="2">
+            <tr>
+                <th>Item</th>
+                <th>Batch No.</th>
+                <th>Quantity</th>
+                <th>Production Date</th>
+                <th>Expiry Date</th>
+                <th>Batch Cost</th>
+                <th>Item Cost</th>
+                <th>Item Price</th>
+                <th>Details</th>
+                {% if perms.storage.delete_batch %}
+                <th>Delete</th>
+                {% endif %}
+            </tr>
+            {% for batch in batches %}
+            <tr>
+                <td>{{ batch.item }}</td>
+                <td>{{ batch.batch_no }}</td>
+                <td>{{ batch.quantity }}</td>
+                <td>{{ batch.production_date }}</td>
+                <td>{{ batch.expiry_date }}</td>
+                <td>{{ batch.cost|intcomma }} EGP</td>
+                <td>{{batch.item_cost_inbatch|intcomma}} EGP</td>
+                <td>{{batch.item_price|intcomma}} EGP</td>
+                <td>{{ batch.details }}</td>
+                {% if perms.storage.delete_batch %}
+                <td>
+                    <a href="{% url 'delete_batch' batch.id %}"
+                       onclick="return confirm('Are you sure you want to delete this batch?')"
+                       style="color: red;">
+                       Delete
+                    </a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10">No items found.</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+<script>
+
+  <!--Batch-->
+
+function openBatchPopup() {
+  document.getElementById("popup-batch").style.display = "block";
+}
+
+function closeBatchPopup() {
+  document.getElementById("popup-batch").style.display = "none";
+}
+
+function openBatchesTablePopup() {
+    document.getElementById("popup-batches-table").style.display = "block";
+}
+
+function closeBatchesTablePopup() {
+  document.getElementById("popup-batches-table").style.display = "none";
+}
+
+</script>
+</body>
+</html>

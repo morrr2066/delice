@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Raw Materials</title>
+</head>
+<body>
+
+  <!-- Raw Materials Table -->
+
+        <!-- Add Raw Button -->
+    {% if perms.storage.add_raw %}
+    <button onclick="openRawPopup()">Add Raw Material</button>
+    <div id="popup-raw" style="display:none;">
+        <form method="POST" action="{% url 'add_raw' %}">
+            {% csrf_token %}
+            <input name="state" placeholder="Raw state" required>
+            <input name="name" placeholder="Raw name" required>
+            <input name="unit" placeholder="Raw unit" required>
+            <input name="cost" placeholder="Raw cost per unit" required>
+            <textarea name="details" placeholder="Details"></textarea>
+            <button type="submit">Add</button>
+        </form>
+            <button onclick="closeRawPopup()">Cancel</button>
+    </div>
+    {% endif %}
+
+    {% if perms.storage.view_raw %}
+
+    <!-- Table -->
+        <h1>Raw Materials in Storage</h1>
+        <table border="2">
+            <tr>
+                <th>State</th>
+                <th>Name</th>
+                <th>Unit</th>
+                <th>EGP Per Unit</th>
+                <th>Details</th>
+                {% if perms.storage.delete_raw %}
+                <th>Delete</th>
+                {% endif %}
+            </tr>
+            {% for raw in raws %}
+            <tr>
+                <td>{{raw.state}}</td>
+                <td>{{ raw.name }}</td>
+                <td>{{ raw.unit }}</td>
+                <td>{{ raw.cost }} EGP</td>
+                <td>{{ raw.details }}</td>
+                {% if perms.storage.delete_raw %}
+                <td>
+                    <a href="{% url 'delete_raw' raw.id %}"
+                       onclick="return confirm('Are you sure you want to delete this raw material?')"
+                       style="color: red;">
+                       Delete
+                    </a>
+                </td>
+                {% endif %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No items found.</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+
+<script>
+  <!--Raw-->
+
+function openRawPopup() {
+    document.getElementById("popup-raw").style.display = "block";
+}
+
+function closeRawPopup() {
+  document.getElementById("popup-raw").style.display = "none";
+}
+
+
+</script>
+</body>
+</html>

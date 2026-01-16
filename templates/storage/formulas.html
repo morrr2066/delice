@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Formulas</title>
+</head>
+<body>
+    <a href="{% url 'home' %}">Home</a>
+&nbsp;&nbsp;
+    <a href="{% url 'storage' %}">Storage</a>
+<br><br>
+<h2><label>Select Item to View Formula:</label></h2>
+  <form method="GET">
+    <select name="item_id">
+      {% for item in items %}
+      <option value="{{ item.id }}">{{item.name}}</option>
+      {% endfor %}
+    </select>
+    <button type="submit">Show Formula</button>
+  </form>
+<hr><br><br><br>
+
+{% if selected_item %}
+  <h1>
+    Formula for: {{selected_item.name}}<br><br>
+    Total cost: {{selected_item.total_cost}}
+  </h1>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>Raw Material</th>
+        <th>Quantity Needed</th>
+        <th>Cost</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for f in formula_details %}
+      <tr>
+        <td>{{ f.raw_material.name }}</td>
+        <td>{{ f.quantity_needed }}</td>
+        <td>{{ f.item_cost }}</td>
+        <td><a href="{% url 'delete_ingredient' f.id %}"
+         onclick="return confirm('Are you sure you want to delete this ingredient?')"
+         style="color: red;">
+         Delete
+            </a>
+      </tr>
+    {% empty %}
+    <tr><td colspan="3">No ingredients added yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+    <a href="{% url 'add_ingredient' selected_item.id %}">
+        <button type="button">Add New Raw Material</button>
+    </a>
+
+{% endif %}
+
+
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+</head>
+<body>
+    <a href="{% url 'home' %}">Home</a>
+&nbsp;
+    {% if perms.analytics.add_financialentry%}
+    <a href="{% url 'inputs' %}"> Inputs</a>
+    {% endif %}
+&nbsp;
+
+    {% if user.is_superuser %}
+        <a href="{% url 'outputs' %}"> Outputs </a>
+    &nbsp;<br><br>
+        <a href="{% url 'analytics-table' %}"> Financial Dashboard </a>&nbsp;
+        <a href="{% url 'reports' %}">Reports</a>
+    {% endif %}
+</body>
+</html>

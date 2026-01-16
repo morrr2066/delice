@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Outputs</title>
+</head>
+<body>
+{% if perms.analytics.add_financialentry%}
+    <form method="POST" action="{% url 'outputs' %}">
+        {% csrf_token %}
+        <input type="number" name="amount" placeholder="amount" required>
+        <input type="text" name="source" placeholder="Source" required>
+        <input type="text" name="location" placeholder="Location" required>
+        <input type="text" name="notes" placeholder="Notes">
+        <button type="submit">Save Entry</button>
+    </form>
+{% endif %}
+</body>
+</html>
