@@ -79,7 +79,8 @@ def outputs(request):
                 notes=notes,
                 added_by=request.user
             )
-            return redirect('outputs')
+            msg = "Entry added successfully!"
+            return HttpResponse(msg)
         except Exception as e:
             print(e)
             return HttpResponse(f"الخطأ هو: {e}")
