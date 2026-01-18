@@ -1,6 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models import SET_NULL
 from simple_history.models import HistoricalRecords
+
+
+
+class Location(models.Model):
+    name = models.CharField(max_length=200,unique=True)
+
+    def __str__(self):
+        return self.name
+
 
 class FinancialEntry(models.Model):
 
@@ -24,14 +34,12 @@ class FinancialEntry(models.Model):
     # 6. تفاصيل إضافية (اختياري - اسم المنتج أو ملاحظات)
     item_name = models.CharField(max_length=100, null=True, blank=True)
 
-    location = models.CharField(max_length=200,null=True,blank=True)
+    location = models.ForeignKey(Location,on_delete=SET_NULL,max_length=200,null=True,blank=True,related_name='entries')
 
     notes = models.TextField(null=True, blank=True)
 
     # 7. مين اللي عمل الأكشن ودوره
     added_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name='financial_actions')
-
-
 
 
     history = HistoricalRecords()
@@ -42,6 +50,20 @@ class FinancialEntry(models.Model):
 
     def __str__(self):
         return f"{self.source} ({self.amount})"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #                       date     type     source     amount     quantity     item-name    location     notes    (automated) x[not needed]
 

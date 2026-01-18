@@ -10,7 +10,14 @@
         {% csrf_token %}
         <input type="number" name="amount" placeholder="amount" required>
         <input type="text" name="source" placeholder="Source" required>
-        <input type="text" name="location" placeholder="Location" required>
+        <select name="location_id">
+            <option value="" disabled selected>Select Location</option>
+            {% for location in locations %}
+                <option value="{{ location.id }}">
+                    {{ location.name }}
+                </option>
+            {% endfor %}
+        </select>
         <input type="text" name="notes" placeholder="Notes">
         <button type="submit">Save Entry</button>
     </form>

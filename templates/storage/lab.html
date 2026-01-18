@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Lab</title>
+</head>
+<body>
+{% if perms.storage.view_raw %}
+<a href="{% url 'storage-raws' %}">Raw Materials</a>
+{% endif %}
+
+{% if perms.storage.view_formula %}
+    <!-- Formulas Button -->
+    <a href="{% url 'formulas' %}">Formulas</a>
+{% endif %}
+
+</body>
+</html>

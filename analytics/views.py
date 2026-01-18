@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
-from analytics.models import FinancialEntry
+from analytics.models import FinancialEntry,Location
 from storage.models import Item
+from django.db.models import Sum, F
 
 
 # Create your views here.
@@ -20,12 +21,13 @@ def outputs(request):
 
 def add_financialentry(request):
     items = Item.objects.all()
+    locations = Location.objects.all()
     if request.method=="POST":
         source = request.POST.get('source')
         item_id = request.POST.get('item_id')
         quantity = request.POST.get('quantity')
         price = request.POST.get('price')
-        location = request.POST.get('location')
+        location_id = request.POST.get('location_id')
         notes = request.POST.get('notes',"")
         try:
             item = Item.objects.get(id=item_id)
@@ -40,7 +42,7 @@ def add_financialentry(request):
                 amount = amount,
                 quantity=quantity,
                 item_name=item.name,
-                location=location,
+                location_id=location_id,
                 notes=notes,
                 added_by=request.user
             )
@@ -51,7 +53,7 @@ def add_financialentry(request):
             print(e)
             return HttpResponse(f"الخطأ هو: {e}")
 
-    return render(request,'analytics/inputs.html',{'items':items})
+    return render(request,'analytics/inputs.html',{'items':items,'locations':locations})
 
 def analytics_table(request):
     entries = FinancialEntry.objects.all().order_by('-id')  # الجديد من فوق
@@ -64,10 +66,11 @@ def delete_financial_entry(request, entry_id):
 
 
 def outputs(request):
+    locations = Location.objects.all()
     if request.method=="POST":
         amount = request.POST.get('amount')
         source = request.POST.get('source')
-        location = request.POST.get('location')
+        location = request.POST.get('location_id')
         notes = request.POST.get('notes',"")
         try:
             FinancialEntry.objects.create(
@@ -85,11 +88,10 @@ def outputs(request):
             print(e)
             return HttpResponse(f"الخطأ هو: {e}")
 
-    return render(request,'analytics/outputs.html')
+    return render(request,'analytics/outputs.html',{'locations':locations})
 
 
 
-from django.db.models import Sum, F
 
 
 def reports(request):
@@ -104,3 +106,4 @@ def reports(request):
         'items': items,
         'total_stock_value': total_value
     })
+

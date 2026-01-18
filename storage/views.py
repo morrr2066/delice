@@ -1,7 +1,9 @@
 from django.contrib.auth.decorators import permission_required
-from django.shortcuts import render , redirect
+from django.shortcuts import render , redirect, get_object_or_404
 from .models import Item,Batch,Raw,Formula
 from django.http import HttpResponse
+from analytics.models import Location
+
 
 def storage_view(request):
     return render(request, 'storage/storage.html')
@@ -140,7 +142,11 @@ def delete_batch(request, batch_id):
     # بنجيب السطر اللي اليوزر داس عليه
     batch_action = Batch.objects.get(id=batch_id)
 
-    batch_action.delete()  # المسح الفعلي
+    item = batch_action.item
+    item.quantity -= batch_action.quantity
+    item.save()
+
+    batch_action.delete()
 
     # الرجوع لنفس الصفحة بنفس الـ ID عشان الجدول يفضل مفتوح
     return redirect(f'/storage/storage/?item_id={batch_id}')
@@ -154,3 +160,34 @@ def delete_raw(request, raw_id):
 
     # الرجوع لنفس الصفحة بنفس الـ ID عشان الجدول يفضل مفتوح
     return redirect(f'/storage/storage/?item_id={raw_id}')
+
+def lab(request):
+    return render(request,'storage/lab.html')
+
+def add_location(request):
+    locations = Location.objects.all()
+    if request.method == "POST":
+        name = request.POST.get('location_name')
+        if name:
+            try:
+                Location.objects.create(name=name)
+                msg = f"Location {name} created successfully!"
+                return HttpResponse(msg)
+            except Exception as e:
+                print(e)
+                msg = f"Error {e} occurred"
+                return HttpResponse(msg)
+    return render(request, 'storage/add_location.html',{'locations':locations})
+
+
+def delete_location(request, location_id):
+    # بنجيب اللوكيشن أو نرجع 404 لو مش موجود
+    location = get_object_or_404(Location, id=location_id)
+    name = location.name
+
+    try:
+        location.delete()
+        return HttpResponse(f"Location '{name}' deleted successfully!")
+    except Exception as e:
+        return HttpResponse(f"Error: Cannot delete location because it might be linked to other data. ({e})")
+

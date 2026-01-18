@@ -1,6 +1,6 @@
 from django.db import models
 from simple_history.models import HistoricalRecords
-from analytics.models import FinancialEntry
+from analytics.models import FinancialEntry,Location
 from django.utils import timezone
 
 class Item(models.Model):
@@ -61,17 +61,21 @@ class Batch(models.Model):
 
         # 3. تسجيل "المصروف" في المالية فوراً
         from .models import FinancialEntry
-        FinancialEntry.objects.create(
-            date=timezone.now().date(),
-            entry_type='EXPENSE',
-            source=f"Batch: {self.batch_no}",
-            amount=self.cost,
-            quantity=self.quantity,
-            item_name=self.item.name,
-            location='BATCH',
-            notes='No notes',
-            added_by=user  # الـ user اللي جايلنا "معدية" من الـ View
-        )
+        default_loc, _ = Location.objects.get_or_create(name="BATCH")
+        try:
+            FinancialEntry.objects.create(
+                date=timezone.now().date(),
+                entry_type='EXPENSE',
+                source=f"Batch: {self.batch_no}",
+                amount=self.cost,
+                quantity=self.quantity,
+                item_name=self.item.name,
+                location=default_loc,
+                notes='No notes',
+                added_by=user  # الـ user اللي جايلنا "معدية" من الـ View
+            )
+        except Exception as e:
+            print(f"Financial Entry Error: {e}")  # هيطبع لك الغلط في التيرمينال
 
     @property
     def item_cost_inbatch(self):

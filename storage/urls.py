@@ -16,5 +16,7 @@ urlpatterns = [
     path('delete-item/<int:item_id>/', views.delete_item, name='delete_item'),
     path('delete-batch/<int:batch_id>/', views.delete_batch, name='delete_batch'),
     path('delete-raw/<int:raw_id>/', views.delete_raw, name='delete_raw'),
-
+    path('lab/',views.lab,name='lab'),
+    path('storage/add_location/',views.add_location,name='add_location'),
+    path('location/delete/<int:location_id>/', views.delete_location, name='delete_location'),
 ]

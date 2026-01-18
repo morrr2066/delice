@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Location</title>
+</head>
+<body>
+<form method="POST">
+    {% csrf_token %}
+    <label>Location Name:</label>
+    <input type="text" name="location_name" required>
+
+    <button type="submit">Save</button>
+</form>
+
+<hr>
+
+<h3>Existing Locations:</h3>
+
+<table class="table table-hover table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Location</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for loc in locations %}
+        <tr>
+            <td>{{ loc.name }}</td>
+            <td class="text-center">
+                <a href="{% url 'delete_location' loc.id %}"
+                   class="btn btn-sm btn-danger"
+                   onclick="return confirm('Are you sure?')">
+                   Delete
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</body>
+</html>
+
