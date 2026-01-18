@@ -63,10 +63,66 @@
             {% endfor %}
         </table>
     {% endif %}
+<br><br><hr><br><br>
+{% if perms.storage.add_consignment %}
+<button onclick="openAddConsignmentPopup()">Add Consignment</button>
 
+<div id="popup-add-consignment" style="display:none;">
+    <form method="POST" action="{% url 'add_consignment' %}">
+        {% csrf_token %}
+
+        <select name="item_id" required>
+            <option value="">Select Item</option>
+            {% for item in items %}
+                <option value="{{ item.id }}">{{ item.name }} (Available: {{ item.quantity }})</option>
+            {% endfor %}
+        </select>
+
+        <select name="location_id" required>
+            <option value="">Select Dealer/Location</option>
+            {% for loc in locations %}
+                <option value="{{ loc.id }}">{{ loc.name }}</option>
+            {% endfor %}
+        </select>
+
+        <input type="number" name="quantity" placeholder="Quantity" required>
+        <input type="number" name="unit_price" placeholder="Unit Price" required>
+
+        <button type="submit">Send Out</button>
+    </form>
+    <button onclick="closeAddConsignmentPopup()">Cancel</button>
+</div>
+{% endif %}
 
 <h1>Consignment</h1>
-
+<table border="2">
+    <tr>
+        <th>Item Name</th>
+        <th>Location</th>
+        <th>Total Sent</th>
+        <th>Sold</th>
+        <th>Remaining</th>
+        <th>Unit Price</th>
+        <th>Collect Money</th>
+    </tr>
+    {% for con in consignments %}
+    <tr>
+        <td>{{ con.item.name }}</td>
+        <td>{{ con.location.name }}</td>
+        <td>{{ con.total_quantity }}</td>
+        <td>{{ con.sold_quantity }}</td>
+        <td><strong>{{ con.remaining_quantity }}</strong></td>
+        <td>{{ con.unit_price }} EGP</td>
+        <td>
+            <form action="{% url 'settle_consignment' con.id %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <input type="number" name="qty_sold" placeholder="Qty" style="width: 50px;" required>
+                <button type="submit">Sell</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 
 
 
@@ -81,7 +137,13 @@ function closeAddItemPopup() {
   document.getElementById("popup-add-item").style.display = "none";
 }
 
+function openAddConsignmentPopup() {
+  document.getElementById("popup-add-consignment").style.display = "block";
+}
 
+function closeAddConsignmentPopup() {
+  document.getElementById("popup-add-consignment").style.display = "none";
+}
 
 </script>
 </body>

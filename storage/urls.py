@@ -6,7 +6,6 @@ urlpatterns = [
     path('storage/items/',views.item_view,name='storage-items'),
     path('storage/batches', views.batch_view, name='storage-batches'),
     path('storage/raws/', views.raw_view, name='storage-raws'),
-
     path('add-item/',views.add_item,name='add_item'),
     path('add-batch',views.add_batch,name='add_batch'),
     path('add-raw/', views.add_raw, name='add_raw'),
@@ -19,4 +18,6 @@ urlpatterns = [
     path('lab/',views.lab,name='lab'),
     path('storage/add_location/',views.add_location,name='add_location'),
     path('location/delete/<int:location_id>/', views.delete_location, name='delete_location'),
+    path('consignment/add/', views.add_consignment, name='add_consignment'),
+    path('consignment/settle/<int:consignment_id>/', views.settle_consignment, name='settle_consignment'),
 ]

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Item,Batch,Raw
+from .models import Item, Batch, Raw, Consignment
 from analytics.models import FinancialEntry
 from simple_history.admin import SimpleHistoryAdmin
 
@@ -7,6 +7,8 @@ admin.site.register(Item,SimpleHistoryAdmin)
 admin.site.register(Batch,SimpleHistoryAdmin)
 admin.site.register(Raw,SimpleHistoryAdmin)
 admin.site.register(FinancialEntry,SimpleHistoryAdmin)
+admin.site.register(Consignment)
+
 
 # استبدل analytics بمجلد الـ App بتاع المالية عندك
 

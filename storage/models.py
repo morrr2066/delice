@@ -124,3 +124,27 @@ class Formula(models.Model):
     def item_cost(self):
         return self.quantity_needed * self.raw_material.cost
 
+
+class Consignment(models.Model):
+    # ربط بالصنف وباللوكيشن (التاجر)
+    item = models.ForeignKey(Item, on_delete=models.CASCADE)
+    location = models.ForeignKey(Location, on_delete=models.CASCADE)
+
+    # الكميات
+    total_quantity = models.PositiveIntegerField(default=0, help_text="الكمية الكلية اللي استلمها")
+    sold_quantity = models.PositiveIntegerField(default=0, help_text="الكمية اللي باعها وسددها")
+
+    # السعر
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2, help_text="سعر القطعة المتفق عليه")
+
+    # التواريخ
+    start_date = models.DateField(auto_now_add=True)
+    last_settlement_date = models.DateField(null=True, blank=True)
+
+    @property
+    def remaining_quantity(self):
+        # خانة "وهمية" بتحسب الفرق بين اللي خده واللي باعه أوتوماتيك
+        return self.total_quantity - self.sold_quantity
+
+    def __str__(self):
+        return f"{self.item.name} at {self.location.name}"

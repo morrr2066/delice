@@ -1,8 +1,10 @@
 from django.contrib.auth.decorators import permission_required
 from django.shortcuts import render , redirect, get_object_or_404
-from .models import Item,Batch,Raw,Formula
+from .models import Item,Batch,Raw,Formula,Consignment
 from django.http import HttpResponse
-from analytics.models import Location
+from analytics.models import Location,FinancialEntry
+from django.utils import timezone
+
 
 
 def storage_view(request):
@@ -11,7 +13,9 @@ def storage_view(request):
 @permission_required('storage.view_item', raise_exception=True)
 def item_view(request):
     items = Item.objects.all()
-    return render(request,'storage/items.html',{"items":items})
+    locations = Location.objects.all()
+    consignments = Consignment.objects.all()
+    return render(request,'storage/items.html',{"items":items,"locations":locations,"consignments":consignments})
 
 @permission_required('storage.view_batch', raise_exception=True)
 def batch_view(request):
@@ -23,6 +27,7 @@ def batch_view(request):
 def raw_view(request):
     raws = Raw.objects.all()
     return render(request,'storage/raws.html',{"raws":raws})
+
 
 
 @permission_required('storage.add_item', raise_exception=True)
@@ -190,4 +195,64 @@ def delete_location(request, location_id):
         return HttpResponse(f"Location '{name}' deleted successfully!")
     except Exception as e:
         return HttpResponse(f"Error: Cannot delete location because it might be linked to other data. ({e})")
+
+def add_consignment(request):
+    if request.method == "POST":
+        item_id = request.POST.get('item_id')
+        location_id = request.POST.get('location_id')
+        qty = int(request.POST.get('quantity'))
+        price = request.POST.get('unit_price')
+
+        item = get_object_or_404(Item, id=item_id)
+        location = get_object_or_404(Location, id=location_id)
+
+        # 1. أهم خطوة: نقص الكمية من مخزنك الرئيسي
+        if item.quantity >= qty:
+            item.quantity -= qty
+            item.save()
+
+            # 2. سجلها في جدول الأمانات
+            Consignment.objects.create(
+                item=item,
+                location=location,
+                total_quantity=qty,
+                unit_price=price
+            )
+            return redirect('storage-items') # صفحة هنكريتها تعرض الأمانات
+        else:
+            return HttpResponse("المخزن مش كفاية!")
+    return redirect('storage-items')
+
+
+def settle_consignment(request, consignment_id):
+    if request.method == "POST":
+        qty_sold = int(request.POST.get('qty_sold'))
+        obj = get_object_or_404(Consignment, id=consignment_id)
+
+        if qty_sold <= obj.remaining_quantity:
+            try:
+                # 1. تحديث بيانات الأمانة
+                obj.sold_quantity += qty_sold
+                obj.last_settlement_date = timezone.now().date()
+                obj.save()
+
+                # 2. رمي سطر في المالية كـ Income أوتوماتيك
+                FinancialEntry.objects.create(
+                    date=timezone.now().date(),
+                    entry_type='INCOME',
+                    source=f"Consignment Sale: {obj.location.name}",
+                    amount=qty_sold * obj.unit_price,
+                    quantity=qty_sold,
+                    item_name=obj.item.name,
+                    location=obj.location,
+                    notes=f"Sold {qty_sold} units from consignment",
+                    added_by=request.user
+                )
+                return redirect('storage-items')
+            except Exception as e:
+                print(e)
+                msg = f"The Problem is {e}"
+                return HttpResponse(msg)
+        return redirect('storage-items')
+
 
