@@ -3,10 +3,13 @@ from django.contrib.auth.decorators import permission_required
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+import json
 from analytics.models import FinancialEntry,Location
 from storage.models import Item
 from django.db.models import Sum, F
-
+from datetime import datetime
+from django.contrib.auth.models import User
 
 # Create your views here.
 def analytics_view(request):
@@ -107,3 +110,38 @@ def reports(request):
         'total_stock_value': total_value
     })
 
+
+@csrf_exempt
+def shopify_webhook(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            bot_user = User.objects.filter(username='Shopify API').first()
+            # 1. سحب البيانات اللي محتاجينها للـ Financial Entry
+            amount = data.get('total_price')
+            order_number = data.get('order_number')
+            # شوبيفاي بيبعت التاريخ كدة: 2026-01-19T18:28:11+02:00
+            # هناخد أول 10 حروف بس عشان الـ DateField (YYYY-MM-DD)
+            raw_date = data.get('created_at')
+            order_date = raw_date[:10] if raw_date else datetime.now().date()
+
+            # 2. تسجيل العملية المالية
+            FinancialEntry.objects.create(
+                date=order_date,
+                entry_type='INCOME',  # طبعاً أوردر شوبيفاي يعني إيراد
+                source='Shopify',  # المصدر ثابت عشان نعرف ده جاي منين
+                amount=amount,
+                item_name=f"Order #{order_number}",
+                notes=f"Automated entry By Shopify",
+                added_by=bot_user,
+                location=Location.objects.get(name='Online'),
+            )
+
+            print(f"✅ Financial Entry Created for Order #{order_number}")
+            return HttpResponse(status=200)
+
+        except Exception as e:
+            print(f"❌ Error: {e}")
+            return HttpResponse(status=400)
+
+    return HttpResponse(status=405)

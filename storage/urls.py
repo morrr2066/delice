@@ -20,4 +20,5 @@ urlpatterns = [
     path('location/delete/<int:location_id>/', views.delete_location, name='delete_location'),
     path('consignment/add/', views.add_consignment, name='add_consignment'),
     path('consignment/settle/<int:consignment_id>/', views.settle_consignment, name='settle_consignment'),
+    path('consignment/return/<int:consignment_id>/', views.return_consignment, name='return_consignment'),
 ]

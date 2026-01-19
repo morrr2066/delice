@@ -256,3 +256,28 @@ def settle_consignment(request, consignment_id):
         return redirect('storage-items')
 
 
+def return_consignment(request, consignment_id):
+    if request.method == "POST":
+        qty_to_return = int(request.POST.get('qty_return'))
+        obj = get_object_or_404(Consignment, id=consignment_id)
+
+        # التأكد إن الكمية اللي راجعة مش أكبر من اللي موجودة فعلاً هناك
+        if qty_to_return <= obj.remaining_quantity:
+            try:
+                # 1. رجع البضاعة للمخزن الرئيسي
+                item = obj.item
+                item.quantity += qty_to_return
+                item.save()
+
+                # 2. نقص الكمية من الأمانة (عن طريق تقليل الـ total_quantity)
+                obj.total_quantity -= qty_to_return
+                obj.save()
+
+                # ملحوظة: مش هنعمل FinancialEntry هنا لأن مفيش فلوس دخلت أو خرجت
+
+                return redirect('storage-items')
+            except Exception as e:
+                return HttpResponse(f"Error: {e}")
+
+        return HttpResponse("الكمية المرتجعة أكبر من المتاحة!")
+    return redirect('storage-items')

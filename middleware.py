@@ -8,7 +8,10 @@ class LoginRequiredMiddleware:
 
     def __call__(self, request):
         if not request.user.is_authenticated:
-            allowed = [reverse('login')]
+            allowed = [
+                reverse('login'),
+                '/analytics/shopify/webhook/',
+            ]
             if request.path not in allowed:
                 return redirect('login')
 

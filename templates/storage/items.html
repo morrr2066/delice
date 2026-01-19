@@ -104,6 +104,7 @@
         <th>Remaining</th>
         <th>Unit Price</th>
         <th>Collect Money</th>
+        <th>Return to Stock</th>
     </tr>
     {% for con in consignments %}
     <tr>
@@ -118,6 +119,13 @@
                 {% csrf_token %}
                 <input type="number" name="qty_sold" placeholder="Qty" style="width: 50px;" required>
                 <button type="submit">Sell</button>
+            </form>
+        </td>
+        <td>
+            <form action="{% url 'return_consignment' con.id %}" method="POST" style="display:inline;">
+                {% csrf_token %}
+                <input type="number" name="qty_return" placeholder="Qty" style="width: 50px; border-color: red;" required>
+                <button type="submit" style="background-color: #ffcccc;">Return</button>
             </form>
         </td>
     </tr>

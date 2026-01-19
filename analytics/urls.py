@@ -8,5 +8,6 @@ urlpatterns = [
     path('analytics/analytics-table/',views.analytics_table,name='analytics-table'),
     path('delete-entry/<int:entry_id>/', views.delete_financial_entry, name='delete_entry'),
     path('outputs/', views.outputs, name='outputs'),
-    path('reports/', views.reports, name='reports')
+    path('reports/', views.reports, name='reports'),
+    path('shopify/webhook/', views.shopify_webhook, name='shopify_webhook'),
 ]
