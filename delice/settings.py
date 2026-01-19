@@ -59,8 +59,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'middleware.LoginRequiredMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
-    'django.middleware.cache.FetchFromCacheMiddleware',
-    'middleware.DisableClientSideCachingMiddleware',
 ]
 
 ROOT_URLCONF = 'delice.urls'
@@ -148,5 +146,6 @@ LOGOUT_REDIRECT_URL = '/login/'
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # لو عندك فولدر static رئيسي
 
 CSRF_TRUSTED_ORIGINS = ['https://*.onrender.com']
