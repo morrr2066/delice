@@ -116,8 +116,7 @@ def shopify_webhook(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            bot_user = User.objects.filter(username='Shopify API').first()
-            # 1. سحب البيانات اللي محتاجينها للـ Financial Entry
+            bot_user, created = User.objects.get_or_create(username='Shopify API')            # 1. سحب البيانات اللي محتاجينها للـ Financial Entry
             amount = data.get('total_price')
             order_number = data.get('order_number')
             # شوبيفاي بيبعت التاريخ كدة: 2026-01-19T18:28:11+02:00
