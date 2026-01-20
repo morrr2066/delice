@@ -1,18 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Lab</title>
-</head>
-<body>
-{% if perms.storage.view_raw %}
-<a href="{% url 'storage-raws' %}">Raw Materials</a>
-{% endif %}
+{% extends "base.html" %}
 
-{% if perms.storage.view_formula %}
-    <!-- Formulas Button -->
-    <a href="{% url 'formulas' %}">Formulas</a>
-{% endif %}
+{% block title %}Lab · Delice{% endblock %}
 
-</body>
-</html>
+{% block content %}
+  <div class="card p-4">
+    <h1 class="h4 page-title mb-1">Lab</h1>
+    <div class="text-muted mb-3">Raw materials and formulas.</div>
+
+    <div class="d-flex flex-wrap gap-2">
+      {% if perms.storage.view_raw %}
+        <a class="btn btn-light" href="{% url 'storage-raws' %}">Raw materials</a>
+      {% endif %}
+      {% if perms.storage.view_formula %}
+        <a class="btn btn-light" href="{% url 'formulas' %}">Formulas</a>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

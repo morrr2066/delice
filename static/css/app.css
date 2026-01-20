@@ -1,0 +1,16 @@
+:root{
+  --app-bg: #f6f7fb;
+}
+
+.app-body{
+  background: var(--app-bg);
+}
+
+.card{
+  border: 1px solid rgba(0,0,0,.06);
+  box-shadow: 0 6px 24px rgba(22, 27, 45, .06);
+}
+
+.page-title{
+  letter-spacing: -.02em;
+}

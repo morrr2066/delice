@@ -1,45 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add Location</title>
-</head>
-<body>
-<form method="POST">
-    {% csrf_token %}
-    <label>Location Name:</label>
-    <input type="text" name="location_name" required>
+{% extends "base.html" %}
 
-    <button type="submit">Save</button>
-</form>
+{% block title %}Locations · Delice{% endblock %}
 
-<hr>
+{% block content %}
+  <div class="row g-3">
+    <div class="col-12 col-lg-5">
+      <div class="card p-4">
+        <h1 class="h4 page-title mb-3">Add location</h1>
+        <form method="POST" class="vstack gap-2">
+          {% csrf_token %}
+          <label class="form-label mb-0">Location name</label>
+          <input class="form-control" type="text" name="location_name" required>
+          <div class="d-flex justify-content-end">
+            <button class="btn btn-dark" type="submit">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
-<h3>Existing Locations:</h3>
-
-<table class="table table-hover table-bordered">
-    <thead class="table-dark">
-        <tr>
-            <th>Location</th>
-            <th class="text-center">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for loc in locations %}
-        <tr>
-            <td>{{ loc.name }}</td>
-            <td class="text-center">
-                <a href="{% url 'delete_location' loc.id %}"
-                   class="btn btn-sm btn-danger"
-                   onclick="return confirm('Are you sure?')">
-                   Delete
-                </a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-</body>
-</html>
+    <div class="col-12 col-lg-7">
+      <div class="card p-4">
+        <div class="fw-semibold mb-2">Existing locations</div>
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr class="text-muted">
+                <th>Location</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for loc in locations %}
+                <tr>
+                  <td class="fw-semibold">{{ loc.name }}</td>
+                  <td class="text-end">
+                    <a href="{% url 'delete_location' loc.id %}"
+                       class="btn btn-outline-danger btn-sm"
+                       onclick="return confirm('Are you sure?')">
+                      Delete
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr><td colspan="2" class="text-center text-muted py-4">No locations.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
 

@@ -1,37 +1,70 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Inputs</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-{% if perms.analytics.add_financialentry%}
-    <form method="POST" action="{% url 'inputs' %}">
-        {% csrf_token %}
-        <select name="item_id">
-            <option value="" disabled selected>Select Item</option>
-            {% for item in items %}
-                <option value="{{ item.id }}">
-                    {{ item.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <input type="number" name="quantity" placeholder="Quantity (Piece)" required>
-        <input type="number" name="price" placeholder="Item Price (EGP)" required>
-        <input type="text" name="source" placeholder="Source" required>
-        <select name="location_id">
-            <option value="" disabled selected>Select Location</option>
-            {% for location in locations %}
-                <option value="{{ location.id }}">
-                    {{ location.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <input type="text" name="notes" placeholder="Notes">
-        <button type="submit">Save Entry</button>
-    </form>
-{% endif %}
+{% block title %}Inputs · Delice{% endblock %}
 
-</body>
-</html>
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <h1 class="h4 page-title mb-0">Inputs (Income)</h1>
+          <a class="btn btn-outline-dark btn-sm" href="{% url 'analytics' %}">Back</a>
+        </div>
+
+        <hr class="my-3" />
+
+        {% if perms.analytics.add_financialentry %}
+          <form method="POST" action="{% url 'add_financial_entry' %}" class="row g-3">
+            {% csrf_token %}
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Item</label>
+              <select class="form-select" name="item_id" required>
+                <option value="" disabled selected>Select Item</option>
+                {% for item in items %}
+                  <option value="{{ item.id }}">{{ item.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Quantity</label>
+              <input class="form-control" type="number" name="quantity" placeholder="Piece" min="1" required>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <label class="form-label">Unit price</label>
+              <input class="form-control" type="number" name="price" placeholder="EGP" min="0" step="0.01" required>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Source</label>
+              <input class="form-control" type="text" name="source" placeholder="Shop / Dealer / etc." required>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label">Location</label>
+              <select class="form-select" name="location_id">
+                <option value="" selected>—</option>
+                {% for location in locations %}
+                  <option value="{{ location.id }}">{{ location.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Notes</label>
+              <input class="form-control" type="text" name="notes" placeholder="Optional">
+            </div>
+
+            <div class="col-12 d-flex justify-content-end gap-2">
+              <button class="btn btn-dark" type="submit">Save entry</button>
+            </div>
+          </form>
+        {% else %}
+          <div class="alert alert-warning mb-0">You don’t have permission to add entries.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

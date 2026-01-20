@@ -1,57 +1,67 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Financial Dashboard</title>
-</head>
-<body>
-<table border="1" style="width:100%; text-align: left; border-collapse: collapse; margin-top: 20px;">
-    <thead>
-        <tr style="background-color: #f2f2f2;">
+{% extends "base.html" %}
+{% load humanize %}
+
+{% block title %}Financial Dashboard · Delice{% endblock %}
+
+{% block content %}
+  <div class="card p-4">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div>
+        <h1 class="h4 page-title mb-1">Financial dashboard</h1>
+        <div class="text-muted">Latest entries (newest first).</div>
+      </div>
+      <a class="btn btn-outline-dark btn-sm" href="{% url 'analytics' %}">Back</a>
+    </div>
+
+    <hr class="my-3" />
+
+    <div class="table-responsive">
+      <table class="table table-sm align-middle">
+        <thead>
+          <tr class="text-muted">
             <th>Date</th>
             <th>Type</th>
             <th>Source</th>
             <th>Item</th>
-            <th>Qty</th>
-            <th>Amount</th>
+            <th class="text-end">Qty</th>
+            <th class="text-end">Amount</th>
             <th>Location</th>
-            <th>Notes</th> <th>Added By</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for entry in entries %}
-        {% load humanize %}
-        <tr>
-            <td>{{ entry.date }}</td>
-            <td style="color: {% if entry.entry_type == 'INCOME' %}green{% else %}red{% endif %}; font-weight: bold;">
-                {{ entry.entry_type }}
-            </td>
-            <td>{{ entry.source }}</td>
-            <td>{{ entry.item_name|default:"-" }}</td>
-            <td>{{ entry.quantity|default:"0" }} Piece</td>
-            <td>{{ entry.amount|intcomma }} EGP</td>
-            <td>{{ entry.location }}</td>
-
-            <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ entry.notes }}">
-                {{ entry.notes|default:"No notes" }}
-            </td>
-
-            <td>{{ entry.added_by.username }}</td>
-            <td>
-                <a href="{% url 'delete_entry' entry.id %}"
-                   onclick="return confirm('Confirm delete?')"
-                   style="color: red; text-decoration: none;">
-                   Delete
+            <th>Notes</th>
+            <th>Added by</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in entries %}
+            <tr>
+              <td>{{ entry.date }}</td>
+              <td>
+                {% if entry.entry_type == 'INCOME' %}
+                  <span class="badge text-bg-success">INCOME</span>
+                {% else %}
+                  <span class="badge text-bg-danger">EXPENSE</span>
+                {% endif %}
+              </td>
+              <td>{{ entry.source }}</td>
+              <td>{{ entry.item_name|default:"-" }}</td>
+              <td class="text-end">{{ entry.quantity|default:"0" }}</td>
+              <td class="text-end">{{ entry.amount|intcomma }} EGP</td>
+              <td>{{ entry.location|default:"-" }}</td>
+              <td class="text-truncate" style="max-width: 220px" title="{{ entry.notes }}">{{ entry.notes|default:"-" }}</td>
+              <td>{{ entry.added_by.username|default:"-" }}</td>
+              <td class="text-end">
+                <a class="btn btn-outline-danger btn-sm"
+                   href="{% url 'delete_entry' entry.id %}"
+                   onclick="return confirm('Confirm delete?')">
+                  Delete
                 </a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="10" style="text-align: center;">No entries found.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-</body>
-</html>
+              </td>
+            </tr>
+          {% empty %}
+            <tr><td colspan="10" class="text-center text-muted py-4">No entries found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock %}

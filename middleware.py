@@ -8,11 +8,12 @@ class LoginRequiredMiddleware:
 
     def __call__(self, request):
         if not request.user.is_authenticated:
-            allowed = [
-                reverse('login'),
+            allowed_prefixes = (
+                reverse('login'),  # /accounts/login/
+                '/admin/',
                 '/analytics/shopify/webhook/',
-            ]
-            if request.path not in allowed:
+            )
+            if not request.path.startswith(allowed_prefixes):
                 return redirect('login')
 
         return self.get_response(request)

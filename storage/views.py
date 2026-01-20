@@ -4,6 +4,7 @@ from .models import Item,Batch,Raw,Formula,Consignment
 from django.http import HttpResponse
 from analytics.models import Location,FinancialEntry
 from django.utils import timezone
+from django.db import transaction
 
 
 
@@ -41,13 +42,13 @@ def add_item(request):
             msg = f"Item {name} created successfully!"
         except:
             msg = f"Item {name} already exists"
-        return HttpResponse(msg)
+            return HttpResponse(msg)
+        return redirect('storage-items')    
 
 @permission_required('storage.add_batch', raise_exception=True)
 def add_batch(request):
     if request.method=='POST':
         item_id = request.POST.get("item")  # ده string
-        item = Item.objects.get(id=item_id)  # كده بقى object
         quantity = int(request.POST.get("batch_quantity"))
         production_date = request.POST.get("production_date")
         expiry_date = request.POST.get("expiry_date")
@@ -56,16 +57,16 @@ def add_batch(request):
 
 
         try:
-            batch = Batch(item=item,quantity=quantity,production_date=production_date,expiry_date=expiry_date,cost=cost,details=details)
-            batch.save(user=request.user)
+            item = get_object_or_404(Item, id=item_id)
+            batch = Batch(item=item,quantity=quantity,production_date=production_date,expiry_date=expiry_date,cost=cost or 0,details=details or "")
+            batch.save(user=request.user)  # atomic in model
             msg = f"{item} Batch created successfully!"
         except Exception as e:
             msg = "Unexpected error occurred!"
             print(e)
 
-        return HttpResponse(msg)
-
-    return redirect('storage')
+            return HttpResponse(msg)
+    return redirect('storage-batches')
 
 @permission_required('storage.add_raw', raise_exception=True)
 def add_raw(request):
@@ -140,7 +141,7 @@ def delete_item(request, item_id):
     item_action.delete()  # المسح الفعلي
 
     # الرجوع لنفس الصفحة بنفس الـ ID عشان الجدول يفضل مفتوح
-    return redirect(f'/storage/storage/?item_id={item_id}')
+    return redirect('storage-items')
 
 @permission_required('storage.delete_batch', raise_exception=True)
 def delete_batch(request, batch_id):
@@ -153,8 +154,7 @@ def delete_batch(request, batch_id):
 
     batch_action.delete()
 
-    # الرجوع لنفس الصفحة بنفس الـ ID عشان الجدول يفضل مفتوح
-    return redirect(f'/storage/storage/?item_id={batch_id}')
+    return redirect('storage-batches')
 
 @permission_required('storage.delete_raw', raise_exception=True)
 def delete_raw(request, raw_id):
@@ -164,7 +164,7 @@ def delete_raw(request, raw_id):
     raw_action.delete()  # المسح الفعلي
 
     # الرجوع لنفس الصفحة بنفس الـ ID عشان الجدول يفضل مفتوح
-    return redirect(f'/storage/storage/?item_id={raw_id}')
+    return redirect('storage-raws')
 
 def lab(request):
     return render(request,'storage/lab.html')

@@ -1,28 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Storage</title>
-</head>
-<body>
+{% extends "base.html" %}
 
-    <!-- Home Button -->
-    <a href="{% url 'home' %}">Home</a>
-&nbsp;&nbsp;
+{% block title %}Storage · Delice{% endblock %}
 
-    <a href="{% url 'lab' %}">Lab</a>
+{% block content %}
+  <div class="card p-4">
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div>
+        <h1 class="h4 page-title mb-1">Storage</h1>
+        <div class="text-muted">Manage stock, batches, raws, and locations.</div>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-dark btn-sm" href="{% url 'lab' %}">Lab</a>
+      </div>
+    </div>
 
-<br><br><br><br>
-{% if perms.storage.view_item %}
-<a href="{% url 'storage-items' %}">Stock</a>
-{% endif %}
-    &nbsp;&nbsp;
-{% if perms.storage.view_batch %}
-<a href="{% url 'storage-batches' %}">Batches</a>
-{% endif %}
-    &nbsp;&nbsp;
-<a href="{% url 'add_location' %}">Locations</a>
+    <hr class="my-3" />
 
-
-</body>
-</html>
+    <div class="d-flex flex-wrap gap-2">
+      {% if perms.storage.view_item %}<a class="btn btn-light" href="{% url 'storage-items' %}">Stock</a>{% endif %}
+      {% if perms.storage.view_batch %}<a class="btn btn-light" href="{% url 'storage-batches' %}">Batches</a>{% endif %}
+      {% if perms.storage.view_raw %}<a class="btn btn-light" href="{% url 'storage-raws' %}">Raws</a>{% endif %}
+      <a class="btn btn-light" href="{% url 'add_location' %}">Locations</a>
+    </div>
+  </div>
+{% endblock %}

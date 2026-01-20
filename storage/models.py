@@ -2,12 +2,13 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from analytics.models import FinancialEntry,Location
 from django.utils import timezone
+from django.db import transaction
 
 class Item(models.Model):
     name = models.CharField(max_length=100, unique=True,blank=False)
     details = models.TextField(blank=True)
     quantity = models.IntegerField(default=0)
-    price = models.IntegerField(max_length=10,blank=True)
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     SKU = models.CharField(max_length=4,unique=True)
     history = HistoricalRecords()
 
@@ -37,7 +38,7 @@ class Batch(models.Model):
     batch_no = models.CharField(max_length=8,unique=True)
     production_date = models.DateField(blank=False)
     expiry_date = models.DateField(blank=False)
-    cost = models.PositiveIntegerField(blank=True)
+    cost = models.PositiveIntegerField(default=0)
     details = models.TextField(blank=True)
     history = HistoricalRecords(verbose_name="z_Batch History")
 
@@ -45,37 +46,36 @@ class Batch(models.Model):
         return f"{self.item} - {self.batch_no}"
 
     def save(self, user=None, *args, **kwargs):
-        # 1. توليد رقم الباتش وتحديث كمية الصنف (بما إنه جديد دايماً)
-        last_batch = Batch.objects.order_by('-id').first()
-        if last_batch:
-            self.batch_no = str(int(last_batch.batch_no) + 1).zfill(8)
-        else:
-            self.batch_no = "00000001"
+        creating = self.pk is None
 
-        # زيادة الكمية في جدول الـ Item
-        self.item.quantity += self.quantity
-        self.item.save()
+        with transaction.atomic():
+            if creating and not self.batch_no:
+                last_batch = Batch.objects.select_for_update().order_by('-id').first()
+                if last_batch and last_batch.batch_no.isdigit():
+                    self.batch_no = str(int(last_batch.batch_no) + 1).zfill(8)
+                else:
+                    self.batch_no = "00000001"
 
-        # 2. حفظ الباتش نفسه في الداتابيز
-        super().save(*args, **kwargs)
+            if creating:
+                item = Item.objects.select_for_update().get(pk=self.item_id)
+                item.quantity += int(self.quantity or 0)
+                item.save(update_fields=["quantity"])
 
-        # 3. تسجيل "المصروف" في المالية فوراً
-        from .models import FinancialEntry
-        default_loc, _ = Location.objects.get_or_create(name="BATCH")
-        try:
-            FinancialEntry.objects.create(
-                date=timezone.now().date(),
-                entry_type='EXPENSE',
-                source=f"Batch: {self.batch_no}",
-                amount=self.cost,
-                quantity=self.quantity,
-                item_name=self.item.name,
-                location=default_loc,
-                notes='No notes',
-                added_by=user  # الـ user اللي جايلنا "معدية" من الـ View
-            )
-        except Exception as e:
-            print(f"Financial Entry Error: {e}")  # هيطبع لك الغلط في التيرمينال
+            super().save(*args, **kwargs)
+
+            if creating:
+                default_loc, _ = Location.objects.get_or_create(name="BATCH")
+                FinancialEntry.objects.create(
+                    date=timezone.now().date(),
+                    entry_type='EXPENSE',
+                    source=f"Batch: {self.batch_no}",
+                    amount=self.cost,
+                    quantity=self.quantity,
+                    item_name=self.item.name,
+                    location=default_loc,
+                    notes='No notes',
+                    added_by=user
+                )
 
     @property
     def item_cost_inbatch(self):
@@ -89,13 +89,11 @@ class Batch(models.Model):
         return self.item.price
 
 
-from django.db import models
-
 class Raw(models.Model):
     state = models.CharField(max_length=50,blank=False)
     name = models.CharField(max_length=300,unique=True,blank=False)
     unit = models.CharField(max_length=100,blank=False)
-    cost = models.FloatField(max_length=50,blank=False)
+    cost = models.DecimalField(max_digits=12, decimal_places=4, default=0)
     details = models.CharField(max_length=500,blank=True)
     history = HistoricalRecords()
 
